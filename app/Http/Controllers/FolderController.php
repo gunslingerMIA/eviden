@@ -322,16 +322,21 @@ class FolderController extends Controller
     public function linkIndicator(Request $request, Document $document)
     {
         $request->validate([
-            'indicator_id' => 'required|exists:evaluation_indicators,id'
+            'indicator_ids' => 'nullable|array',
+            'indicator_ids.*' => 'exists:evaluation_indicators,id'
         ]);
 
         $user = User::first(); // Bypass Auth
+        $indicatorIds = $request->input('indicator_ids', []);
 
-        $document->indicators()->syncWithoutDetaching([
-            $request->indicator_id => ['ditautkan_oleh' => $user->id]
-        ]);
+        $syncData = [];
+        foreach ($indicatorIds as $id) {
+            $syncData[$id] = ['ditautkan_oleh' => $user->id];
+        }
 
-        return redirect()->back()->with('success', 'Dokumen berhasil dikaitkan ke penilaian!');
+        $document->indicators()->sync($syncData);
+
+        return redirect()->back()->with('success', 'Tautan dokumen dengan penilaian berhasil diperbarui!');
     }
 
     // Lepas Tautan Dokumen dari Indikator Evaluasi

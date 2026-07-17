@@ -20,6 +20,7 @@
          copyShareStatus: 'Salin Link',
          isShared: false,
          shareUrl: '',
+         linkedIndicatorIds: [],
          async toggleShareStatus() {
              if (!this.selectedDoc) return;
              let url = `/documents/${this.selectedDoc.id}/toggle-share`;
@@ -719,7 +720,7 @@
                                 </div>
                                 
                                 <button 
-                                    @click="openLinkIndicator = true; setTimeout(() => lucide.createIcons(), 50);" 
+                                    @click="openLinkIndicator = true; linkedIndicatorIds = selectedDoc.indicators ? selectedDoc.indicators.map(i => i.id) : []; setTimeout(() => lucide.createIcons(), 50);" 
                                     class="w-full py-2 border border-indigo-200 text-indigo-700 bg-indigo-50/50 rounded-xl text-xs font-semibold hover:bg-indigo-50 transition flex items-center justify-center gap-1.5"
                                 >
                                     <i data-lucide="link" class="w-3.5 h-3.5"></i> Kaitkan ke Penilaian
@@ -876,7 +877,7 @@
                     </a>
                 </div>
                 <div class="py-1">
-                    <button @click="contextMenu.show = false; openLinkIndicator = true;" class="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-50 text-slate-700 transition text-left">
+                    <button @click="contextMenu.show = false; openLinkIndicator = true; linkedIndicatorIds = selectedDoc.indicators ? selectedDoc.indicators.map(i => i.id) : [];" class="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-50 text-slate-700 transition text-left">
                         <i data-lucide="link" class="w-3.5 h-3.5 text-slate-450"></i> Kaitkan Penilaian
                     </button>
                     <button @click="contextMenu.show = false; openMoveModal = true; moveTargetType = 'document'; moveTargetId = contextMenu.targetId; moveTargetName = contextMenu.targetName; setTimeout(() => lucide.createIcons(), 50);" class="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-50 text-slate-700 transition text-left">
@@ -1203,7 +1204,7 @@
                                 <div class="space-y-1.5 pl-5">
                                     @foreach($eval->indicators as $indicator)
                                         <label class="flex items-start gap-2.5 p-2 hover:bg-slate-50 rounded-lg cursor-pointer transition text-xs">
-                                            <input type="radio" name="indicator_id" value="{{ $indicator->id }}" required class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
+                                            <input type="checkbox" name="indicator_ids[]" value="{{ $indicator->id }}" x-model="linkedIndicatorIds" class="mt-0.5 text-indigo-600 rounded focus:ring-indigo-500">
                                             <div>
                                                 <p class="font-semibold text-slate-800">{{ $indicator->nama_indikator }}</p>
                                                 <p class="text-[10px] text-slate-400 leading-snug mt-0.5">{{ $indicator->deskripsi }}</p>
