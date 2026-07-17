@@ -32,4 +32,12 @@ class Folder extends Model
     {
         return $this->belongsTo(User::class, 'dibuat_oleh');
     }
+
+    //relasi many to many ke indikator evaluasi
+    public function indicators()
+    {
+        return $this->belongsToMany(EvaluationIndicator::class, 'folder_indicator', 'folder_id', 'indicator_id')
+                ->withPivot('ditautkan_oleh')
+                ->withTimestamps();
+    }
 }

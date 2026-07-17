@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVIDEN - Manajemen Bukti Fisik</title>
+    
+    <!-- Muat Tailwind CSS dari Vite -->
+    @vite(['resources/css/app.css'])
+
+    <!-- Alpine.js (Untuk modul modal interaktif) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex">
+
+    <!-- Sidebar Menu Kiri -->
+    <aside class="w-64 bg-slate-900 text-slate-100 flex flex-col justify-between hidden md:flex shrink-0 h-full overflow-y-auto">
+        <div>
+            <!-- Header Brand -->
+            <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+                <div class="bg-indigo-600 p-2 rounded-lg text-white font-bold text-lg">EV</div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none">EVIDEN</h1>
+                    <span class="text-xs text-slate-400">Bukti Dukung Evaluasi</span>
+                </div>
+            </div>
+            
+            <!-- List Link Menu -->
+            <nav class="p-4 space-y-1">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+                </a>
+                <a href="{{ route('folders.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition {{ request()->routeIs('folders.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i data-lucide="database" class="w-4 h-4"></i> File Manajer
+                </a>
+                <a href="{{ route('evaluations.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition {{ request()->routeIs('evaluations.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i data-lucide="check-square" class="w-4 h-4"></i> Indikator Evaluasi
+                </a>
+            </nav>
+        </div>
+
+        <!-- Bypass Account Status -->
+        <div class="p-4 border-t border-slate-800 bg-slate-950/40">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs">P1</div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-300">Pegawai Satu (Demo)</p>
+                    <span class="text-[9px] bg-amber-500/20 text-amber-400 px-1 py-0.5 rounded font-mono font-bold">DEV BYPASS</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Halaman Utama Kanan -->
+    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
+            <div class="text-sm text-slate-500 font-medium">Sistem Pengarsipan & Evaluasi Digital</div>
+            <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">Koneksi Database OK</span>
+        </header>
+
+        <main class="flex-1 p-6 overflow-y-auto">
+            @yield('content')
+        </main>
+    </div>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Initialize Lucide Icons & SweetAlert Helpers -->
+    <script>
+        lucide.createIcons();
+
+        // Custom SweetAlert2 Toast
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3500,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        // Trigger session notifications
+        @if(session('success'))
+            Toast.fire({
+                icon: 'success',
+                title: '{{ session('success') }}'
+            });
+        @endif
+
+        @if(session('error'))
+            Toast.fire({
+                icon: 'error',
+                title: '{{ session('error') }}'
+            });
+        @endif
+
+        // Global Confirmation Dialog
+        function confirmDelete(e, title = 'Apakah Anda yakin?', text = 'Tindakan ini tidak dapat dibatalkan!') {
+            e.preventDefault();
+            const form = e.target.closest('form') || e.currentTarget || e.target;
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5', // indigo-600
+                cancelButtonColor: '#f43f5e', // rose-500
+                confirmButtonText: 'Ya, Lanjutkan!',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-2xl border border-slate-100 shadow-2xl p-6',
+                    title: 'text-lg font-bold text-slate-800',
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (form) {
+                        HTMLFormElement.prototype.submit.call(form);
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

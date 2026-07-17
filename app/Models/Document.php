@@ -1,14 +1,17 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Database\Eloquent\SoftDeletes; //aktifkan fitur recycle bin
 
 use Illuminate\Database\Eloquent\Model;
 
 class Document extends Model
 {
+    use SoftDeletes;
+    
     //
 
-    use SoftDeletes; //aktifkan fitur recycle bin
+    
 
     protected $guarded = [];
 

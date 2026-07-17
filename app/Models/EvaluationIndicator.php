@@ -30,4 +30,11 @@ class EvaluationIndicator extends Model
                 ->withPivot('ditautkan_oleh')
                 ->withTimestamps();
     }
+
+    // relasi many to many ke gudang folder
+    public function folders(){
+        return $this->belongsToMany(Folder::class, 'folder_indicator', 'indicator_id', 'folder_id')
+                ->withPivot('ditautkan_oleh')
+                ->withTimestamps();
+    }
 }
