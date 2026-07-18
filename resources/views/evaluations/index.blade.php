@@ -90,7 +90,7 @@
                                 <input type="radio" name="document_id" value="{{ $doc->id }}" required class="text-indigo-600 focus:ring-indigo-500">
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">{{ $doc->judul_dokumen }}</p>
-                                    <span class="text-[10px] text-slate-500 font-mono">{{ strtoupper($doc->ekstensi) }} &bull; {{ $doc->folder->nama_folder ?? 'Gudang Utama' }}</span>
+                                    <span class="text-[10px] text-slate-500 font-mono">{{ strtoupper($doc->ekstensi) }} &bull; {{ $doc->folder->nama_folder ?? 'File Manager' }}</span>
                                 </div>
                             </label>
                         @endforeach

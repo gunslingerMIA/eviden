@@ -6,6 +6,7 @@
          openNewFolder: false, 
          openUpload: false, 
          selectedDoc: null, 
+         showDetailPanel: false,
          previewDoc: null,
          copyStatus: 'Salin Link',
          openEditFolder: false,
@@ -201,7 +202,7 @@
 >
 
     <!-- Overlay Visual Drag & Drop -->
-    <div x-show="isDragging" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 bg-indigo-600/90 backdrop-blur-sm border-4 border-dashed border-white text-white rounded-2xl animate-in fade-in duration-150" x-cloak>
+    <div x-show="isDragging" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 bg-indigo-600/90 backdrop-blur-sm border-4 border-dashed border-white text-white rounded-2xl animate-in fade-in duration-150 pointer-events-none" x-cloak>
         <div class="p-6 bg-white/10 rounded-full mb-4 animate-bounce">
             <i data-lucide="upload-cloud" class="w-16 h-16"></i>
         </div>
@@ -210,324 +211,308 @@
     </div>
 
     <!-- Top Action Bar & Breadcrumbs -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm animate-in fade-in duration-200"
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 xl:gap-4 mb-4 xl:mb-6 bg-white p-4 xl:p-6 rounded-2xl border border-slate-200 shadow-sm animate-in fade-in duration-200"
          @contextmenu.prevent="openContextMenu($event, 'blank')">
-        <div>
+        <div class="min-w-0">
             <!-- Breadcrumbs -->
-            <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
-                <a href="{{ route('folders.index') }}" class="hover:text-indigo-600 flex items-center gap-1 transition">
-                    <i data-lucide="database" class="w-3.5 h-3.5"></i> Gudang Utama
+            <div class="flex items-center gap-1.5 xl:gap-2 text-[10px] xl:text-xs text-slate-400 font-medium">
+                <a href="{{ route('folders.index') }}" class="hover:text-indigo-600 flex items-center gap-1 transition shrink-0">
+                    <i data-lucide="database" class="w-3 h-3 xl:w-3.5 xl:h-3.5"></i> File Manager
                 </a>
                 @if($currentFolder)
-                    <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300"></i>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 shrink-0"></i>
                     @if($currentFolder->parent)
-                        <a href="{{ route('folders.show', $currentFolder->parent->id) }}" class="hover:text-indigo-600 transition">{{ $currentFolder->parent->nama_folder }}</a>
-                        <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300"></i>
+                        <a href="{{ route('folders.show', $currentFolder->parent->id) }}" class="hover:text-indigo-600 transition truncate">{{ $currentFolder->parent->nama_folder }}</a>
+                        <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 shrink-0"></i>
                     @endif
-                    <span class="text-slate-800 font-semibold">{{ $currentFolder->nama_folder }}</span>
+                    <span class="text-slate-800 font-semibold truncate">{{ $currentFolder->nama_folder }}</span>
                 @endif
             </div>
-            <h2 class="text-2xl font-bold text-slate-900 mt-2 flex items-center gap-2">
-                <i data-lucide="folder-open" class="w-6 h-6 text-indigo-600"></i>
-                {{ $currentFolder ? $currentFolder->nama_folder : 'Gudang Utama' }}
+            <h2 class="text-lg xl:text-2xl font-bold text-slate-900 mt-1.5 xl:mt-2 flex items-center gap-2">
+                <i data-lucide="folder-open" class="w-5 h-5 xl:w-6 xl:h-6 text-indigo-600 shrink-0"></i>
+                <span class="truncate">{{ $currentFolder ? $currentFolder->nama_folder : 'File Manager' }}</span>
             </h2>
         </div>
         
         <!-- Action Buttons -->
-        <div class="flex items-center gap-3">
-            <button @click="openNewFolder = true" class="flex items-center gap-2 px-4 py-2.5 border border-slate-300 rounded-xl text-sm font-semibold bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-sm transition">
-                <i data-lucide="folder-plus" class="w-4 h-4 text-slate-500"></i>
-                Buat Folder
+        <div class="flex items-center gap-2 xl:gap-3 flex-wrap shrink-0">
+            <button @click="openNewFolder = true" class="flex items-center gap-1.5 xl:gap-2 px-3 xl:px-4 py-2 xl:py-2.5 border border-slate-300 rounded-xl text-xs xl:text-sm font-semibold bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-sm transition">
+                <i data-lucide="folder-plus" class="w-3.5 h-3.5 xl:w-4 xl:h-4 text-slate-500"></i>
+                <span class="hidden sm:inline">Buat</span> Folder
             </button>
-            <button @click="openUpload = true" class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 rounded-xl text-sm font-semibold text-white hover:bg-indigo-700 shadow-sm transition">
-                <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-                Unggah Dokumen
+            <button @click="openUpload = true" class="flex items-center gap-1.5 xl:gap-2 px-3 xl:px-4 py-2 xl:py-2.5 bg-indigo-600 rounded-xl text-xs xl:text-sm font-semibold text-white hover:bg-indigo-700 shadow-sm transition">
+                <i data-lucide="upload-cloud" class="w-3.5 h-3.5 xl:w-4 xl:h-4"></i>
+                Unggah <span class="hidden sm:inline">Dokumen</span>
             </button>
-            <button @click="document.getElementById('folderInputDirect').click()" class="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 rounded-xl text-sm font-semibold text-white shadow-sm transition">
-                <i data-lucide="folder-up" class="w-4 h-4"></i>
-                Unggah Folder
+            <button @click="document.getElementById('folderInputDirect').click()" class="flex items-center gap-1.5 xl:gap-2 px-3 xl:px-4 py-2 xl:py-2.5 bg-amber-500 hover:bg-amber-600 rounded-xl text-xs xl:text-sm font-semibold text-white shadow-sm transition">
+                <i data-lucide="folder-up" class="w-3.5 h-3.5 xl:w-4 xl:h-4"></i>
+                <span class="hidden sm:inline">Unggah</span> Folder
             </button>
         </div>
     </div>
 
     <!-- Tab & Search Bar (Drive style subbar) -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8" @contextmenu.prevent="openContextMenu($event, 'blank')">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 xl:gap-4 mb-5 xl:mb-8" @contextmenu.prevent="openContextMenu($event, 'blank')">
         <!-- Tab selector -->
         <div class="flex items-center bg-slate-200/60 p-1 rounded-xl">
             <button 
                 @click="currentTab = 'files'; selectedDoc = null;" 
-                class="px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-2"
+                class="px-3 xl:px-4 py-1.5 xl:py-2 rounded-lg text-[10px] xl:text-xs font-bold transition-all duration-200 flex items-center gap-1.5 xl:gap-2"
                 :class="currentTab === 'files' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
             >
-                <i data-lucide="files" class="w-3.5 h-3.5"></i> Semua Berkas
+                <i data-lucide="files" class="w-3 h-3 xl:w-3.5 xl:h-3.5"></i> Semua Berkas
             </button>
             <button 
                 @click="currentTab = 'trash'; selectedDoc = null;" 
-                class="px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-2"
+                class="px-3 xl:px-4 py-1.5 xl:py-2 rounded-lg text-[10px] xl:text-xs font-bold transition-all duration-200 flex items-center gap-1.5 xl:gap-2"
                 :class="currentTab === 'trash' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
             >
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Tempat Sampah
+                <i data-lucide="trash-2" class="w-3 h-3 xl:w-3.5 xl:h-3.5"></i> Tempat Sampah
             </button>
         </div>
 
         <!-- Search Bar & Toggle View -->
-        <div class="flex items-center gap-3 w-full sm:w-auto">
+        <div class="flex items-center gap-2 xl:gap-3 w-full sm:w-auto">
             <!-- Search Bar -->
-            <div class="relative w-full sm:w-72">
-                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <i data-lucide="search" class="w-4 h-4"></i>
+            <div class="relative w-full sm:w-56 xl:w-72">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i data-lucide="search" class="w-3.5 h-3.5 xl:w-4 xl:h-4"></i>
                 </span>
                 <input 
                     type="text" 
                     x-model="searchQuery" 
                     placeholder="Cari berkas atau folder..." 
-                    class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-700 focus:outline-none focus:border-indigo-500 transition shadow-sm"
+                    class="w-full pl-9 xl:pl-10 pr-3 xl:pr-4 py-1.5 xl:py-2 border border-slate-200 rounded-xl text-[10px] xl:text-xs bg-white text-slate-700 focus:outline-none focus:border-indigo-500 transition shadow-sm"
                 >
             </div>
             <!-- View Mode Toggle -->
-            <div class="flex items-center bg-slate-200/60 p-1 rounded-xl shrink-0">
+            <div class="flex items-center bg-slate-200/60 p-0.5 xl:p-1 rounded-xl shrink-0">
                 <button 
                     @click="viewMode = 'grid'; localStorage.setItem('eviden_view_mode', 'grid'); setTimeout(() => lucide.createIcons(), 50);" 
-                    class="p-2 rounded-lg text-xs font-bold transition flex items-center justify-center"
+                    class="p-1.5 xl:p-2 rounded-lg text-xs font-bold transition flex items-center justify-center"
                     :class="viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
                     title="Tampilan Kisi (Grid)"
                 >
-                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                    <i data-lucide="layout-grid" class="w-3.5 h-3.5 xl:w-4 xl:h-4"></i>
                 </button>
                 <button 
                     @click="viewMode = 'list'; localStorage.setItem('eviden_view_mode', 'list'); setTimeout(() => lucide.createIcons(), 50);" 
-                    class="p-2 rounded-lg text-xs font-bold transition flex items-center justify-center"
+                    class="p-1.5 xl:p-2 rounded-lg text-xs font-bold transition flex items-center justify-center"
                     :class="viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
                     title="Tampilan Daftar (List)"
                 >
-                    <i data-lucide="list" class="w-4 h-4"></i>
+                    <i data-lucide="list" class="w-3.5 h-3.5 xl:w-4 xl:h-4"></i>
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Layout Utama: File Manager & Sidebar Detail -->
-    <div class="w-full flex-1 flex flex-col lg:flex-row gap-6 items-start"
+    <div class="w-full flex-1 flex flex-col xl:flex-row gap-4 xl:gap-6 items-start"
          @contextmenu.prevent="openContextMenu($event, 'blank')">
         
         <!-- Panel Kiri: Grid Folder & List Dokumen -->
-        <div class="w-full lg:flex-1 space-y-8">
+        <div class="w-full xl:flex-1 min-w-0 space-y-6 xl:space-y-8">
             
-            <!-- VIEW: SEMUA BERKAS -->
-            <div x-show="currentTab === 'files'" class="space-y-8">
-                <!-- Bagian Folder -->
-                <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <i data-lucide="folders" class="w-4 h-4 text-slate-400"></i> Daftar Folder
-                    </h3>
-                    @if($folders->isEmpty())
-                        <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl text-center text-slate-400 text-sm italic">
-                            Tidak ada subfolder di direktori ini.
-                        </div>
-                    @else
-                        <div :class="viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4' : 'flex flex-col gap-2'">
-                            @foreach($folders as $folder)
-                                <div class="flex items-center justify-between bg-white border border-slate-200 rounded-2xl hover:border-indigo-500 hover:shadow-md transition duration-200 group"
-                                     :class="viewMode === 'grid' ? 'p-5' : 'p-3'"
-                                     x-show="!searchQuery || {{ json_encode(strtolower($folder->nama_folder)) }}.includes(searchQuery.toLowerCase())"
-                                     @contextmenu.prevent.stop="openContextMenu($event, 'folder', { id: '{{ $folder->id }}', nama_folder: '{{ addslashes($folder->nama_folder) }}' })">
-                                    <a href="{{ route('folders.show', $folder->id) }}" class="flex items-center gap-4 min-w-0 flex-1">
-                                        <div class="p-3 bg-amber-50 group-hover:bg-amber-100 rounded-xl text-amber-500 transition shrink-0">
-                                            <i data-lucide="folder" class="w-6 h-6"></i>
-                                        </div>
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-sm font-bold text-slate-800 truncate group-hover:text-indigo-600 transition leading-snug">{{ $folder->nama_folder }}</p>
-                                            <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                                                <span class="text-[10px] text-slate-400 shrink-0">Oleh: {{ $folder->user->name ?? 'System' }}</span>
-                                                @foreach($folder->indicators as $ind)
-                                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded text-[9px] font-semibold">
-                                                        {{ $ind->nama_indikator }}
-                                                        <form action="{{ route('folders.unlink-indicator', [$folder->id, $ind->id]) }}" method="POST" class="inline" onsubmit="confirmDelete(event, 'Lepas Kaitan?', 'Lepas kaitan folder dengan penilaian ini?')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="text-indigo-400 hover:text-rose-600 transition ml-0.5" title="Lepas Kaitan">✕</button>
-                                                        </form>
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    </a>
-                                    <!-- Tombol Aksi Rename / Hapus Folder -->
-                                    <div class="flex items-center gap-1.5 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button @click.prevent="openEditFolder = true; editFolderId = '{{ $folder->id }}'; editFolderName = '{{ addslashes($folder->nama_folder) }}'; setTimeout(() => lucide.createIcons(), 50);" class="p-1 text-slate-400 hover:text-indigo-600 transition" title="Ubah Nama">
-                                            <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
-                                        </button>
-                                        <form action="{{ route('folders.destroy', $folder->id) }}" method="POST" onsubmit="confirmDelete(event, 'Hapus Folder?', 'Folder ini beserta seluruh isi subfolder dan berkas di dalamnya akan terhapus permanen!')" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 transition" title="Hapus Folder">
-                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
+            <!-- VIEW: SEMUA BERKAS (Google Drive Style) -->
+            <div x-show="currentTab === 'files'">
+                
+                @if($folders->isEmpty() && $documents->isEmpty())
+                    <div class="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center text-slate-400">
+                        <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-slate-300 mb-3"></i>
+                        <p class="text-sm font-semibold text-slate-600">Folder ini masih kosong</p>
+                        <p class="text-xs text-slate-400 mt-1">Gunakan tombol di atas atau seret berkas langsung ke layar ini.</p>
+                    </div>
+                @else
 
-                <!-- Bagian Berkas Dokumen -->
-                <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <i data-lucide="files" class="w-4 h-4 text-slate-400"></i> Berkas Pendukung (Eviden)
-                    </h3>
-                    @if($documents->isEmpty())
-                        <div class="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center text-slate-400">
-                            <i data-lucide="file-text" class="w-12 h-12 mx-auto text-slate-300 mb-3"></i>
-                            <p class="text-sm font-semibold text-slate-600">Belum ada dokumen eviden</p>
-                            <p class="text-xs text-slate-400 mt-1">Gunakan tombol "Unggah Dokumen" atau seret berkas langsung ke layar ini.</p>
-                        </div>
-                    @else
-                        <!-- Tampilan Daftar (List Table View) -->
-                        <div x-show="viewMode === 'list'" class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm animate-in fade-in duration-200">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                        <th class="px-6 py-4">Nama Berkas</th>
-                                        <th class="px-6 py-4">Masa Berlaku</th>
-                                        <th class="px-6 py-4">Tipe & Ukuran</th>
-                                        <th class="px-6 py-4">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
-                                    @foreach($documents as $doc)
-                                        @php
-                                            $docObj = [
-                                                'id' => $doc->id,
-                                                'judul_dokumen' => $doc->judul_dokumen,
-                                                'file_path' => asset('storage/' . $doc->file_path),
-                                                'ekstensi' => strtolower($doc->ekstensi),
-                                                'ukuran_file' => number_format($doc->ukuran_file / 1024, 0) . ' KB',
-                                                'uploader_name' => $doc->uploader->name ?? 'System',
-                                                'tahun_mulai' => $doc->tahun_mulai ?? 'Tanpa Tahun',
-                                                'tahun_selesai' => $doc->tahun_selesai,
-                                                'is_shared' => (bool)$doc->is_shared,
-                                                'share_token' => $doc->share_token,
-                                                'share_url' => $doc->share_token ? route('documents.shared', $doc->share_token) : '',
-                                                'is_trashed' => false,
-                                                'indicators' => $doc->indicators->map(fn($i) => ['id' => $i->id, 'nama_indikator' => $i->nama_indikator])
-                                            ];
-                                        @endphp
-                                        <tr 
-                                            @click.stop="selectedDoc = {{ json_encode($docObj) }}; isShared = selectedDoc.is_shared; shareUrl = selectedDoc.share_url; copyStatus = 'Salin Link'; setTimeout(() => lucide.createIcons(), 50);" 
-                                            @dblclick.stop="previewDoc = selectedDoc; setTimeout(() => lucide.createIcons(), 50);"
-                                            @contextmenu.prevent.stop="selectedDoc = {{ json_encode($docObj) }}; isShared = selectedDoc.is_shared; shareUrl = selectedDoc.share_url; openContextMenu($event, 'document', selectedDoc);"
-                                            class="hover:bg-slate-50/70 transition cursor-pointer"
-                                            :class="selectedDoc && selectedDoc.id == '{{ $doc->id }}' ? 'bg-indigo-50/50' : ''"
-                                            x-show="!searchQuery || {{ json_encode(strtolower($doc->judul_dokumen)) }}.includes(searchQuery.toLowerCase())"
-                                        >
-                                            <td class="px-6 py-4 font-bold text-slate-900">
-                                                <div class="flex items-center gap-3.5">
-                                                    <div class="p-2 rounded-lg" :class="selectedDoc && selectedDoc.id == '{{ $doc->id }}' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'">
-                                                        <i data-lucide="file-text" class="w-5 h-5"></i>
-                                                    </div>
-                                                    <div class="min-w-0">
-                                                        <p class="leading-snug truncate max-w-xs sm:max-w-md">{{ $doc->judul_dokumen }}</p>
-                                                        <span class="text-[10px] text-slate-400 font-mono font-medium">{{ basename($doc->file_path) }}</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                @if($doc->tahun_mulai)
-                                                    <span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-mono font-semibold">
-                                                        {{ $doc->tahun_mulai }} {{ $doc->tahun_selesai ? ' - ' . $doc->tahun_selesai : '' }}
-                                                    </span>
-                                                @else
-                                                    <span class="text-slate-400 italic text-xs">Tanpa tahun</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 font-mono text-xs">
-                                                <span class="uppercase font-bold text-slate-700">{{ $doc->ekstensi }}</span>
-                                                @if($doc->ukuran_file)
-                                                    <span class="text-slate-400"> ({{ number_format($doc->ukuran_file / 1024, 0) }} KB)</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                @if($doc->is_shared)
-                                                    <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 w-fit">
-                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Dibagikan
-                                                    </span>
-                                                @else
-                                                    <span class="bg-slate-100 text-slate-500 text-xs font-semibold px-2.5 py-1 rounded-lg w-fit block">
-                                                        Privat
-                                                    </span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                    <!-- ===== GRID VIEW (Google Drive Style) ===== -->
+                    <div x-show="viewMode === 'grid'" class="space-y-6 animate-in fade-in duration-200">
 
-                        <!-- Tampilan Kisi (Grid Cards View) -->
-                        <div x-show="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 animate-in fade-in duration-200" x-cloak>
-                            @foreach($documents as $doc)
-                                @php
-                                    $docObj = [
-                                        'id' => $doc->id,
-                                        'judul_dokumen' => $doc->judul_dokumen,
-                                        'file_path' => asset('storage/' . $doc->file_path),
-                                        'ekstensi' => strtolower($doc->ekstensi),
-                                        'ukuran_file' => number_format($doc->ukuran_file / 1024, 0) . ' KB',
-                                        'uploader_name' => $doc->uploader->name ?? 'System',
-                                        'tahun_mulai' => $doc->tahun_mulai ?? 'Tanpa Tahun',
-                                        'tahun_selesai' => $doc->tahun_selesai,
-                                        'is_shared' => (bool)$doc->is_shared,
-                                        'share_token' => $doc->share_token,
-                                        'share_url' => $doc->share_token ? route('documents.shared', $doc->share_token) : '',
-                                        'is_trashed' => false,
-                                        'indicators' => $doc->indicators->map(fn($i) => ['id' => $i->id, 'nama_indikator' => $i->nama_indikator])
-                                    ];
-                                @endphp
-                                <div 
-                                    @click.stop="selectedDoc = {{ json_encode($docObj) }}; isShared = selectedDoc.is_shared; shareUrl = selectedDoc.share_url; copyStatus = 'Salin Link'; setTimeout(() => lucide.createIcons(), 50);" 
-                                    @dblclick.stop="previewDoc = selectedDoc; setTimeout(() => lucide.createIcons(), 50);"
-                                    @contextmenu.prevent.stop="selectedDoc = {{ json_encode($docObj) }}; isShared = selectedDoc.is_shared; shareUrl = selectedDoc.share_url; openContextMenu($event, 'document', selectedDoc);"
-                                    class="bg-white border border-slate-200 rounded-2xl p-4 hover:border-indigo-500 hover:shadow-md transition duration-200 cursor-pointer flex flex-col justify-between group relative"
-                                    :class="selectedDoc && selectedDoc.id == '{{ $doc->id }}' ? 'border-indigo-500 bg-indigo-50/10' : ''"
-                                    x-show="!searchQuery || {{ json_encode(strtolower($doc->judul_dokumen)) }}.includes(searchQuery.toLowerCase())"
-                                >
-                                    <!-- File Preview/Icon Container -->
-                                    <div class="h-28 bg-slate-50/80 border border-slate-100 rounded-xl flex items-center justify-center mb-3 text-slate-400 group-hover:bg-slate-100/50 transition">
-                                        @if(in_array(strtolower($doc->ekstensi), ['png', 'jpg', 'jpeg', 'svg', 'webp']))
-                                            <img src="{{ asset('storage/' . $doc->file_path) }}" class="w-full h-full object-cover rounded-xl">
-                                        @elseif(strtolower($doc->ekstensi) === 'pdf')
-                                            <i data-lucide="file-text" class="w-10 h-10 text-rose-500"></i>
-                                        @else
-                                            <i data-lucide="file" class="w-10 h-10 text-indigo-500"></i>
-                                        @endif
-                                    </div>
-                                    
-                                    <!-- File Info -->
-                                    <div class="min-w-0">
-                                        <p class="text-xs font-bold text-slate-800 truncate leading-snug group-hover:text-indigo-600 transition">{{ $doc->judul_dokumen }}</p>
-                                        <div class="flex items-center justify-between mt-1.5 text-[10px] text-slate-400">
-                                            <span>{{ strtoupper($doc->ekstensi) }} • {{ number_format($doc->ukuran_file / 1024, 0) }} KB</span>
-                                            <span>{{ $doc->uploader->name ?? 'System' }}</span>
-                                        </div>
+                        {{-- === FOLDER GRID (Horizontal cards, like Google Drive) === --}}
+                        @if(!$folders->isEmpty())
+                            <div class="grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
+                                @foreach($folders as $folder)
+                                    <div class="bg-white border border-slate-200/80 rounded-xl hover:bg-slate-50 transition duration-150 cursor-pointer group relative h-[48px] flex items-center"
+                                         x-show="!searchQuery || {{ json_encode(strtolower($folder->nama_folder)) }}.includes(searchQuery.toLowerCase())"
+                                         @contextmenu.prevent.stop="openContextMenu($event, 'folder', { id: '{{ $folder->id }}', nama_folder: '{{ addslashes($folder->nama_folder) }}' })">
                                         
-                                        <!-- Indicator badges inside Grid View card -->
-                                        @if(!$doc->indicators->isEmpty())
-                                            <div class="flex flex-wrap gap-1 mt-2.5">
-                                                @foreach($doc->indicators as $ind)
-                                                    <span class="inline-flex items-center px-1.5 py-0.5 bg-indigo-50/80 border border-indigo-150 text-indigo-700 rounded text-[9px] font-semibold">
-                                                        {{ $ind->nama_indikator }}
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        @endif
+                                        <a href="{{ route('folders.show', $folder->id) }}" class="flex items-center gap-3 px-3 min-w-0 flex-1 h-full">
+                                            <i data-lucide="folder" class="w-5 h-5 text-slate-400 group-hover:text-amber-500 transition shrink-0"></i>
+                                            <p class="text-[13px] font-medium text-slate-700 truncate group-hover:text-slate-900 transition">{{ $folder->nama_folder }}</p>
+                                        </a>
+
+                                        {{-- Three-dot menu --}}
+                                        <button @click.prevent.stop="openContextMenu($event, 'folder', { id: '{{ $folder->id }}', nama_folder: '{{ addslashes($folder->nama_folder) }}' })" 
+                                                class="shrink-0 p-1.5 mr-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200/80 rounded-full transition opacity-0 group-hover:opacity-100">
+                                            <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                                        </button>
                                     </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- === FILE GRID (Square cards with preview, like Google Drive) === --}}
+                        @if(!$documents->isEmpty())
+                            <div class="grid gap-3" style="grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));">
+                                @foreach($documents as $doc)
+                                    @php
+                                        $docObj = [
+                                            'id' => $doc->id,
+                                            'judul_dokumen' => $doc->judul_dokumen,
+                                            'file_path' => asset('storage/' . $doc->file_path),
+                                            'ekstensi' => strtolower($doc->ekstensi),
+                                            'ukuran_file' => number_format($doc->ukuran_file / 1024, 0) . ' KB',
+                                            'uploader_name' => $doc->uploader->name ?? 'System',
+                                            'tahun_mulai' => $doc->tahun_mulai ?? 'Tanpa Tahun',
+                                            'tahun_selesai' => $doc->tahun_selesai,
+                                            'is_shared' => (bool)$doc->is_shared,
+                                            'share_token' => $doc->share_token,
+                                            'share_url' => $doc->share_token ? route('documents.shared', $doc->share_token) : '',
+                                            'is_trashed' => false,
+                                            'indicators' => $doc->indicators->map(fn($i) => ['id' => $i->id, 'nama_indikator' => $i->nama_indikator])
+                                        ];
+                                    @endphp
+                                    <div 
+                                        @click.stop="selectedDoc = {{ json_encode($docObj) }}; isShared = selectedDoc.is_shared; shareUrl = selectedDoc.share_url; copyStatus = 'Salin Link'; setTimeout(() => lucide.createIcons(), 50);" 
+                                        @dblclick.stop="previewDoc = selectedDoc; setTimeout(() => lucide.createIcons(), 50);"
+                                        @contextmenu.prevent.stop="selectedDoc = {{ json_encode($docObj) }}; isShared = selectedDoc.is_shared; shareUrl = selectedDoc.share_url; openContextMenu($event, 'document', selectedDoc);"
+                                        class="bg-white border border-slate-200 rounded-xl hover:shadow-sm transition duration-150 cursor-pointer group relative overflow-hidden"
+                                        :class="selectedDoc && selectedDoc.id == '{{ $doc->id }}' ? 'ring-2 ring-indigo-500 border-indigo-500' : 'hover:bg-slate-50'"
+                                        x-show="!searchQuery || {{ json_encode(strtolower($doc->judul_dokumen)) }}.includes(searchQuery.toLowerCase())"
+                                    >
+                                        {{-- File Preview Area --}}
+                                        <div class="h-[130px] bg-slate-50 flex items-center justify-center border-b border-slate-100 group-hover:bg-slate-100/60 transition">
+                                            @if(in_array(strtolower($doc->ekstensi), ['png', 'jpg', 'jpeg', 'svg', 'webp']))
+                                                <img src="{{ asset('storage/' . $doc->file_path) }}" class="w-full h-full object-cover">
+                                            @elseif(strtolower($doc->ekstensi) === 'pdf')
+                                                <i data-lucide="file-text" class="w-10 h-10 text-rose-400"></i>
+                                            @elseif(in_array(strtolower($doc->ekstensi), ['doc', 'docx']))
+                                                <i data-lucide="file-text" class="w-10 h-10 text-blue-400"></i>
+                                            @elseif(in_array(strtolower($doc->ekstensi), ['xls', 'xlsx']))
+                                                <i data-lucide="file-spreadsheet" class="w-10 h-10 text-emerald-400"></i>
+                                            @elseif(in_array(strtolower($doc->ekstensi), ['ppt', 'pptx']))
+                                                <i data-lucide="file-presentation" class="w-10 h-10 text-orange-400"></i>
+                                            @elseif(in_array(strtolower($doc->ekstensi), ['zip', 'rar', '7z']))
+                                                <i data-lucide="file-archive" class="w-10 h-10 text-amber-400"></i>
+                                            @else
+                                                <i data-lucide="file" class="w-10 h-10 text-slate-400"></i>
+                                            @endif
+                                        </div>
+
+                                        {{-- File Info --}}
+                                        <div class="p-3 min-w-0 flex items-center gap-2">
+                                            @if(strtolower($doc->ekstensi) === 'pdf')
+                                                <i data-lucide="file-text" class="w-4 h-4 text-rose-400 shrink-0"></i>
+                                            @elseif(in_array(strtolower($doc->ekstensi), ['png', 'jpg', 'jpeg', 'svg', 'webp']))
+                                                <i data-lucide="image" class="w-4 h-4 text-violet-400 shrink-0"></i>
+                                            @elseif(in_array(strtolower($doc->ekstensi), ['doc', 'docx']))
+                                                <i data-lucide="file-text" class="w-4 h-4 text-blue-400 shrink-0"></i>
+                                            @elseif(in_array(strtolower($doc->ekstensi), ['xls', 'xlsx']))
+                                                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                                            @else
+                                                <i data-lucide="file" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                                            @endif
+                                            <p class="text-[13px] font-medium text-slate-800 truncate leading-snug">{{ $doc->judul_dokumen }}</p>
+                                        </div>
+
+                                        {{-- Three-dot menu on hover --}}
+                                        <button @click.stop="selectedDoc = {{ json_encode($docObj) }}; isShared = selectedDoc.is_shared; shareUrl = selectedDoc.share_url; openContextMenu($event, 'document', selectedDoc);" 
+                                                class="absolute top-1.5 right-1.5 p-1 text-slate-500 hover:text-slate-700 bg-white/80 hover:bg-white rounded-full shadow-sm transition opacity-0 group-hover:opacity-100">
+                                            <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                    </div>
+
+                    <!-- ===== LIST VIEW (Google Drive Style Table) ===== -->
+                    <div x-show="viewMode === 'list'" class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm animate-in fade-in duration-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs font-medium text-slate-500">
+                                    <th class="px-4 py-3 font-medium">Nama</th>
+                                    <th class="px-4 py-3 font-medium hidden sm:table-cell">Pemilik</th>
+                                    <th class="px-4 py-3 font-medium hidden md:table-cell">Tanggal dibuat</th>
+                                    <th class="px-4 py-3 font-medium">Ukuran</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
+
+                                {{-- Folder Rows --}}
+                                @foreach($folders as $folder)
+                                    <tr class="hover:bg-slate-50 transition cursor-pointer group"
+                                        x-show="!searchQuery || {{ json_encode(strtolower($folder->nama_folder)) }}.includes(searchQuery.toLowerCase())"
+                                        @contextmenu.prevent.stop="openContextMenu($event, 'folder', { id: '{{ $folder->id }}', nama_folder: '{{ addslashes($folder->nama_folder) }}' })">
+                                        <td class="px-4 py-2.5">
+                                            <a href="{{ route('folders.show', $folder->id) }}" class="flex items-center gap-3 min-w-0">
+                                                <i data-lucide="folder" class="w-5 h-5 text-slate-400 group-hover:text-amber-500 transition shrink-0"></i>
+                                                <span class="text-[13px] font-medium text-slate-800 truncate group-hover:text-slate-900">{{ $folder->nama_folder }}</span>
+                                            </a>
+                                        </td>
+                                        <td class="px-4 py-2.5 text-xs text-slate-500 hidden sm:table-cell">{{ $folder->user->name ?? 'System' }}</td>
+                                        <td class="px-4 py-2.5 text-xs text-slate-500 hidden md:table-cell">{{ $folder->created_at->format('d M Y') }}</td>
+                                        <td class="px-4 py-2.5 text-xs text-slate-400">—</td>
+                                    </tr>
+                                @endforeach
+
+                                {{-- Document Rows --}}
+                                @foreach($documents as $doc)
+                                    @php
+                                        $docObj = [
+                                            'id' => $doc->id,
+                                            'judul_dokumen' => $doc->judul_dokumen,
+                                            'file_path' => asset('storage/' . $doc->file_path),
+                                            'ekstensi' => strtolower($doc->ekstensi),
+                                            'ukuran_file' => number_format($doc->ukuran_file / 1024, 0) . ' KB',
+                                            'uploader_name' => $doc->uploader->name ?? 'System',
+                                            'tahun_mulai' => $doc->tahun_mulai ?? 'Tanpa Tahun',
+                                            'tahun_selesai' => $doc->tahun_selesai,
+                                            'is_shared' => (bool)$doc->is_shared,
+                                            'share_token' => $doc->share_token,
+                                            'share_url' => $doc->share_token ? route('documents.shared', $doc->share_token) : '',
+                                            'is_trashed' => false,
+                                            'indicators' => $doc->indicators->map(fn($i) => ['id' => $i->id, 'nama_indikator' => $i->nama_indikator])
+                                        ];
+                                    @endphp
+                                    <tr 
+                                        @click.stop="selectedDoc = {{ json_encode($docObj) }}; isShared = selectedDoc.is_shared; shareUrl = selectedDoc.share_url; copyStatus = 'Salin Link'; setTimeout(() => lucide.createIcons(), 50);" 
+                                        @dblclick.stop="previewDoc = selectedDoc; setTimeout(() => lucide.createIcons(), 50);"
+                                        @contextmenu.prevent.stop="selectedDoc = {{ json_encode($docObj) }}; isShared = selectedDoc.is_shared; shareUrl = selectedDoc.share_url; openContextMenu($event, 'document', selectedDoc);"
+                                        class="hover:bg-slate-50 transition cursor-pointer group"
+                                        :class="selectedDoc && selectedDoc.id == '{{ $doc->id }}' ? 'bg-indigo-50/40' : ''"
+                                        x-show="!searchQuery || {{ json_encode(strtolower($doc->judul_dokumen)) }}.includes(searchQuery.toLowerCase())"
+                                    >
+                                        <td class="px-4 py-2.5">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                @if(strtolower($doc->ekstensi) === 'pdf')
+                                                    <i data-lucide="file-text" class="w-5 h-5 text-rose-400 shrink-0"></i>
+                                                @elseif(in_array(strtolower($doc->ekstensi), ['png', 'jpg', 'jpeg', 'svg', 'webp']))
+                                                    <i data-lucide="image" class="w-5 h-5 text-violet-400 shrink-0"></i>
+                                                @elseif(in_array(strtolower($doc->ekstensi), ['doc', 'docx']))
+                                                    <i data-lucide="file-text" class="w-5 h-5 text-blue-400 shrink-0"></i>
+                                                @elseif(in_array(strtolower($doc->ekstensi), ['xls', 'xlsx']))
+                                                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+                                                @else
+                                                    <i data-lucide="file" class="w-5 h-5 text-slate-400 shrink-0"></i>
+                                                @endif
+                                                <span class="text-[13px] font-medium text-slate-800 truncate">{{ $doc->judul_dokumen }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-2.5 text-xs text-slate-500 hidden sm:table-cell">{{ $doc->uploader->name ?? 'System' }}</td>
+                                        <td class="px-4 py-2.5 text-xs text-slate-500 hidden md:table-cell">{{ $doc->created_at->format('d M Y') }}</td>
+                                        <td class="px-4 py-2.5 text-xs text-slate-500">{{ number_format($doc->ukuran_file / 1024, 0) }} KB</td>
+                                    </tr>
+                                @endforeach
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                @endif
             </div>
+
 
             <!-- VIEW: TEMPAT SAMPAH (Recycle Bin) -->
             <div x-show="currentTab === 'trash'" class="space-y-6" x-cloak>
@@ -630,21 +615,18 @@
 
         </div>
 
-        <!-- Panel Kanan: Sidebar Detail Berkas -->
-        <div class="w-full lg:w-80 shrink-0">
-            <!-- Tampilan Kosong Jika Belum Ada Berkas yang Dipilih -->
-            <div x-show="!selectedDoc" class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-slate-400 shadow-sm">
-                <i data-lucide="info" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
-                <p class="text-xs font-semibold">Klik salah satu berkas di kiri untuk melihat detail & mengaktifkan link sharing.</p>
-            </div>
+        <!-- Panel Kanan: Sidebar Detail Berkas (Toggle) -->
+        <div x-show="showDetailPanel && selectedDoc" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-4" class="w-full xl:w-72 2xl:w-80 shrink-0" x-cloak>
 
             <template x-if="selectedDoc">
-                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6 animate-in fade-in slide-in-from-right-4 duration-200" x-cloak>
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-5">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                         <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            <i data-lucide="file-info" class="w-4 h-4 text-indigo-600"></i> Detail Berkas
+                            <i data-lucide="file-info" class="w-4 h-4 text-indigo-600"></i> Detail
                         </h4>
-                        <button @click="selectedDoc = null" class="text-slate-400 hover:text-slate-600 text-xs p-1">✕</button>
+                        <button @click="showDetailPanel = false" class="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition" title="Tutup panel detail">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
                     </div>
 
                     <!-- Visual Tipe Berkas -->
@@ -869,6 +851,9 @@
         <template x-if="contextMenu.type === 'document'">
             <div class="divide-y divide-slate-100">
                 <div class="py-1">
+                    <button @click="contextMenu.show = false; showDetailPanel = true; setTimeout(() => lucide.createIcons(), 50);" class="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-50 text-slate-700 transition text-left">
+                        <i data-lucide="info" class="w-3.5 h-3.5 text-slate-450"></i> Lihat Detail
+                    </button>
                     <button @click="contextMenu.show = false; previewDoc = selectedDoc;" class="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-50 text-slate-700 transition text-left">
                         <i data-lucide="eye" class="w-3.5 h-3.5 text-slate-450"></i> Pratinjau
                     </button>
@@ -1086,7 +1071,7 @@
                 <div class="mb-5">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Folder Tujuan</label>
                     <select :name="moveTargetType === 'folder' ? 'parent_id' : 'folder_id'" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition">
-                        <option value="">Gudang Utama (Root)</option>
+                        <option value="">File Manager (Root)</option>
                         @foreach($moveFolderOptions as $opt)
                             <!-- Jangan tampilkan opsi jika target adalah folder itu sendiri -->
                             <template x-if="moveTargetType !== 'folder' || moveTargetId != '{{ $opt['id'] }}'">

@@ -142,12 +142,12 @@ class FolderController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Dokumen berhasil diunggah di Gudang Utama!',
+                'message' => 'Dokumen berhasil diunggah di File Manager!',
                 'document' => $doc ? $doc->load('uploader') : null
             ]);
         }
 
-        return redirect()->back()->with('success', 'Dokumen berhasil diunggah di Gudang Utama!');
+        return redirect()->back()->with('success', 'Dokumen berhasil diunggah di File Manager!');
     }
 
     // Unggah Dokumen ke dalam subfolder

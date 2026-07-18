@@ -24,41 +24,51 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex">
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex" x-data="{ sidebarOpen: false }">
+
+    <!-- Mobile Sidebar Overlay Backdrop -->
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 xl:hidden" x-cloak x-transition.opacity></div>
 
     <!-- Sidebar Menu Kiri -->
-    <aside class="w-64 bg-slate-900 text-slate-100 flex flex-col justify-between hidden md:flex shrink-0 h-full overflow-y-auto">
+    <aside 
+        class="w-56 xl:w-60 bg-slate-900 text-slate-100 flex flex-col justify-between shrink-0 h-full overflow-y-auto z-50 transition-transform duration-300"
+        :class="sidebarOpen ? 'fixed inset-y-0 left-0 translate-x-0' : 'fixed inset-y-0 left-0 -translate-x-full xl:relative xl:translate-x-0'"
+    >
         <div>
             <!-- Header Brand -->
-            <div class="p-6 border-b border-slate-800 flex items-center gap-3">
-                <div class="bg-indigo-600 p-2 rounded-lg text-white font-bold text-lg">EV</div>
-                <div>
-                    <h1 class="font-bold text-lg leading-none">EVIDEN</h1>
-                    <span class="text-xs text-slate-400">Bukti Dukung Evaluasi</span>
+            <div class="p-4 xl:p-5 border-b border-slate-800 flex items-center gap-3">
+                <div class="bg-indigo-600 p-1.5 xl:p-2 rounded-lg text-white font-bold text-sm xl:text-base">EV</div>
+                <div class="flex-1 min-w-0">
+                    <h1 class="font-bold text-base xl:text-lg leading-none">EVIDEN</h1>
+                    <span class="text-[10px] xl:text-xs text-slate-400">Bukti Dukung Evaluasi</span>
                 </div>
+                <!-- Close button mobile -->
+                <button @click="sidebarOpen = false" class="xl:hidden p-1 text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
             </div>
             
             <!-- List Link Menu -->
-            <nav class="p-4 space-y-1">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+            <nav class="p-3 xl:p-4 space-y-1">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 xl:px-4 py-2.5 xl:py-3 rounded-lg text-xs xl:text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> Dashboard
                 </a>
-                <a href="{{ route('folders.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition {{ request()->routeIs('folders.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                    <i data-lucide="database" class="w-4 h-4"></i> File Manajer
+                <a href="{{ route('folders.index') }}" class="flex items-center gap-3 px-3 xl:px-4 py-2.5 xl:py-3 rounded-lg text-xs xl:text-sm font-medium transition {{ request()->routeIs('folders.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i data-lucide="database" class="w-4 h-4 shrink-0"></i> File Manajer
                 </a>
-                <a href="{{ route('evaluations.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition {{ request()->routeIs('evaluations.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                    <i data-lucide="check-square" class="w-4 h-4"></i> Indikator Evaluasi
+                <a href="{{ route('evaluations.index') }}" class="flex items-center gap-3 px-3 xl:px-4 py-2.5 xl:py-3 rounded-lg text-xs xl:text-sm font-medium transition {{ request()->routeIs('evaluations.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i data-lucide="check-square" class="w-4 h-4 shrink-0"></i> Indikator Evaluasi
                 </a>
             </nav>
         </div>
 
         <!-- Bypass Account Status -->
-        <div class="p-4 border-t border-slate-800 bg-slate-950/40">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs">P1</div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-300">Pegawai Satu (Demo)</p>
-                    <span class="text-[9px] bg-amber-500/20 text-amber-400 px-1 py-0.5 rounded font-mono font-bold">DEV BYPASS</span>
+        <div class="p-3 xl:p-4 border-t border-slate-800 bg-slate-950/40">
+            <div class="flex items-center gap-2 xl:gap-3">
+                <div class="w-7 h-7 xl:w-8 xl:h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-[10px] xl:text-xs shrink-0">P1</div>
+                <div class="min-w-0">
+                    <p class="text-[10px] xl:text-xs font-semibold text-slate-300 truncate">Pegawai Satu (Demo)</p>
+                    <span class="text-[8px] xl:text-[9px] bg-amber-500/20 text-amber-400 px-1 py-0.5 rounded font-mono font-bold">DEV BYPASS</span>
                 </div>
             </div>
         </div>
@@ -66,12 +76,18 @@
 
     <!-- Halaman Utama Kanan -->
     <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
-            <div class="text-sm text-slate-500 font-medium">Sistem Pengarsipan & Evaluasi Digital</div>
-            <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">Koneksi Database OK</span>
+        <header class="h-14 xl:h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 xl:px-6 shrink-0">
+            <div class="flex items-center gap-3">
+                <!-- Hamburger Menu Button (mobile/tablet) -->
+                <button @click="sidebarOpen = !sidebarOpen" class="xl:hidden p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="text-xs xl:text-sm text-slate-500 font-medium">Sistem Pengarsipan & Evaluasi Digital</div>
+            </div>
+            <span class="text-[10px] xl:text-xs font-semibold bg-emerald-100 text-emerald-800 px-2 xl:px-2.5 py-1 rounded-full">Koneksi Database OK</span>
         </header>
 
-        <main class="flex-1 p-6 overflow-y-auto">
+        <main class="flex-1 p-4 xl:p-6 overflow-y-auto">
             @yield('content')
         </main>
     </div>
@@ -82,6 +98,14 @@
     <!-- Initialize Lucide Icons & SweetAlert Helpers -->
     <script>
         lucide.createIcons();
+
+        // Prevent default drag/drop behavior globally to prevent the browser from opening dropped files
+        window.addEventListener("dragover", function(e) {
+            e.preventDefault();
+        }, false);
+        window.addEventListener("drop", function(e) {
+            e.preventDefault();
+        }, false);
 
         // Custom SweetAlert2 Toast
         const Toast = Swal.mixin({
