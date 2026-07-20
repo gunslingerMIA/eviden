@@ -46,10 +46,25 @@ Route::delete('/documents/{document}/unlink-indicator/{indicator}', [FolderContr
 // Halaman Publik (Tanpa Login) untuk Melihat/Mengunduh Berkas yang Dibagikan
 Route::get('/shared/{token}', [FolderController::class, 'viewShared'])->name('documents.shared');
 
+// Simulasi Ganti Pengguna
+Route::post('/switch-user/{user}', [DashboardController::class, 'switchUser'])->name('switch-user');
 
-// Route evaluasi indikator & penautan eviden
+
+// Route evaluasi & indikator & penautan eviden
 Route::prefix('evaluations')->name('evaluations.')->group(function (){
     Route::get('/', [EvaluationController::class, 'index'])->name('index');
+    Route::post('/', [EvaluationController::class, 'store'])->name('store');
+    Route::get('/{evaluation}', [EvaluationController::class, 'show'])->name('show');
+    Route::put('/{evaluation}', [EvaluationController::class, 'update'])->name('update');
+    Route::delete('/{evaluation}', [EvaluationController::class, 'destroy'])->name('destroy');
+    
+    // CRUD Indikator
+    Route::post('/{evaluation}/indicators', [EvaluationController::class, 'storeIndicator'])->name('indicators.store');
+    Route::put('/indicators/{indicator}', [EvaluationController::class, 'updateIndicator'])->name('indicators.update');
+    Route::delete('/indicators/{indicator}', [EvaluationController::class, 'destroyIndicator'])->name('indicators.destroy');
+    
+    // Penautan dokumen
     Route::post('/indicators/{indicator}/link-document', [EvaluationController::class, 'linkDocument'])->name('link-document');
     Route::post('/indicators/{indicator}/unlink-document/{document}', [EvaluationController::class, 'unlinkDocument'])->name('unlink-document');
+    Route::post('/indicators/{indicator}/upload-document', [EvaluationController::class, 'uploadDocument'])->name('upload-document');
 });

@@ -30,13 +30,25 @@ class FolderController extends Controller
     // Tampilkan berkas dan folder di halaman root (Gudang Utama)
     public function index()
     {
-        $folders = Folder::whereNull('parent_id')->with(['user', 'indicators.evaluation'])->get();
-        $documents = Document::whereNull('folder_id')->with(['uploader', 'indicators.evaluation'])->get();
+        $activeUserId = session('active_user_id', User::first()->id);
+        $user = User::find($activeUserId);
+
+        $folders = Folder::whereNull('parent_id')
+            ->where('dibuat_oleh', $user->id)
+            ->with(['user', 'indicators.evaluation'])
+            ->get();
+        $documents = Document::whereNull('folder_id')
+            ->where('uploader_id', $user->id)
+            ->with(['uploader', 'indicators.evaluation'])
+            ->get();
         $evaluations = Evaluation::with('indicators')->get();
         
-        $foldersRaw = Folder::all();
+        $foldersRaw = Folder::where('dibuat_oleh', $user->id)->get();
         $moveFolderOptions = $this->buildIndentedFolders($foldersRaw);
-        $trashedDocuments = Document::onlyTrashed()->with(['uploader', 'indicators.evaluation'])->get();
+        $trashedDocuments = Document::onlyTrashed()
+            ->where('uploader_id', $user->id)
+            ->with(['uploader', 'indicators.evaluation'])
+            ->get();
         
         return view('folders.index', [
             'folders' => $folders,
@@ -51,16 +63,27 @@ class FolderController extends Controller
     // Tampilkan subfolder
     public function show(Folder $folder)
     {
+        $activeUserId = session('active_user_id', User::first()->id);
+        $user = User::find($activeUserId);
+
+        // Security check: folder must belong to active user
+        if ($folder->dibuat_oleh != $user->id) {
+            abort(403, 'Anda tidak memiliki hak akses ke folder ini.');
+        }
+
         $folder->load(['children.user', 'children.indicators.evaluation', 'documents.uploader', 'documents.indicators.evaluation', 'indicators.evaluation']);
         $evaluations = Evaluation::with('indicators')->get();
         
-        $foldersRaw = Folder::all();
+        $foldersRaw = Folder::where('dibuat_oleh', $user->id)->get();
         $moveFolderOptions = $this->buildIndentedFolders($foldersRaw);
-        $trashedDocuments = Document::onlyTrashed()->with(['uploader', 'indicators.evaluation'])->get();
+        $trashedDocuments = Document::onlyTrashed()
+            ->where('uploader_id', $user->id)
+            ->with(['uploader', 'indicators.evaluation'])
+            ->get();
         
         return view('folders.index', [
             'folders' => $folder->children,
-            'documents' => $folder->documents,
+            'documents' => $folder->documents->where('uploader_id', $user->id),
             'evaluations' => $evaluations,
             'moveFolderOptions' => $moveFolderOptions,
             'trashedDocuments' => $trashedDocuments,
@@ -76,7 +99,8 @@ class FolderController extends Controller
             'parent_id' => 'nullable|exists:folders,id'
         ]);
 
-        $user = User::first(); // Bypass Auth
+        $activeUserId = session('active_user_id', User::first()->id);
+        $user = User::find($activeUserId);
 
         Folder::create([
             'nama_folder' => $request->nama_folder,
@@ -97,7 +121,8 @@ class FolderController extends Controller
             'tahun_selesai' => 'nullable|integer',
         ]);
 
-        $user = User::first(); // Bypass Auth
+        $activeUserId = session('active_user_id', User::first()->id);
+        $user = User::find($activeUserId);
 
         $relativeFolderId = null;
         if ($request->has('relative_path') && !empty($request->relative_path)) {
@@ -160,7 +185,8 @@ class FolderController extends Controller
             'tahun_selesai' => 'nullable|integer',
         ]);
 
-        $user = User::first(); // Bypass Auth
+        $activeUserId = session('active_user_id', User::first()->id);
+        $user = User::find($activeUserId);
 
         $relativeFolderId = $folder->id;
         if ($request->has('relative_path') && !empty($request->relative_path)) {
@@ -326,7 +352,8 @@ class FolderController extends Controller
             'indicator_ids.*' => 'exists:evaluation_indicators,id'
         ]);
 
-        $user = User::first(); // Bypass Auth
+        $activeUserId = session('active_user_id', User::first()->id);
+        $user = User::find($activeUserId);
         $indicatorIds = $request->input('indicator_ids', []);
 
         $syncData = [];
@@ -485,7 +512,8 @@ class FolderController extends Controller
             'indicator_id' => 'required|exists:evaluation_indicators,id'
         ]);
 
-        $user = User::first(); // Bypass Auth
+        $activeUserId = session('active_user_id', User::first()->id);
+        $user = User::find($activeUserId);
 
         $folder->indicators()->syncWithoutDetaching([
             $request->indicator_id => ['ditautkan_oleh' => $user->id]

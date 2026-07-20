@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         // 2. Buat Data Evaluasi & Indikator
         $evaluasi = Evaluation::create([
             'nama_evaluasi' => 'Evaluasi Kinerja Zona Integritas',
+            'deskripsi' => 'Evaluasi Penilaian Mandiri Pembangunan Zona Integritas menuju Wilayah Bebas dari Korupsi (WBK) dan Wilayah Birokrasi Bersih dan Melayani (WBBM).',
             'instansi_penilai' => 'Kementerian PANRB',
             'tahun' => 2026,
         ]);

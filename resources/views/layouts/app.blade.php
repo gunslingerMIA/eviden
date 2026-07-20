@@ -62,14 +62,46 @@
             </nav>
         </div>
 
-        <!-- Bypass Account Status -->
-        <div class="p-3 xl:p-4 border-t border-slate-800 bg-slate-950/40">
-            <div class="flex items-center gap-2 xl:gap-3">
-                <div class="w-7 h-7 xl:w-8 xl:h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-[10px] xl:text-xs shrink-0">P1</div>
-                <div class="min-w-0">
-                    <p class="text-[10px] xl:text-xs font-semibold text-slate-300 truncate">Pegawai Satu (Demo)</p>
-                    <span class="text-[8px] xl:text-[9px] bg-amber-500/20 text-amber-400 px-1 py-0.5 rounded font-mono font-bold">DEV BYPASS</span>
+        <!-- Bypass Account Status with User Switcher -->
+        @php
+            $allUsersForSwitch = \App\Models\User::all();
+            $activeUserForSidebar = \App\Models\User::find(session('active_user_id', \App\Models\User::first()->id ?? null));
+        @endphp
+        <div class="p-3 xl:p-4 border-t border-slate-800 bg-slate-950/40 relative" x-data="{ openSwitcher: false }">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-7 h-7 xl:w-8 xl:h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-[10px] xl:text-xs shrink-0" 
+                         x-text="'{{ $activeUserForSidebar ? substr($activeUserForSidebar->name, 0, 1) : 'U' }}'">
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-[10px] xl:text-xs font-semibold text-slate-300 truncate">{{ $activeUserForSidebar ? $activeUserForSidebar->name : 'No User' }}</p>
+                        <span class="text-[8px] xl:text-[9px] bg-amber-500/20 text-amber-400 px-1 py-0.5 rounded font-mono font-bold">PIC ACTIVE</span>
+                    </div>
                 </div>
+                <!-- Trigger Switch Dropdown -->
+                <button @click="openSwitcher = !openSwitcher" class="text-slate-400 hover:text-white transition shrink-0 p-1">
+                    <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+
+            <!-- Switcher Dropdown (Slide-up menu) -->
+            <div x-show="openSwitcher" @click.away="openSwitcher = false" 
+                 class="absolute bottom-full left-3 right-3 mb-2 bg-slate-800 border border-slate-700 rounded-lg p-1.5 space-y-1 text-[10px] xl:text-xs shadow-xl z-50" 
+                 x-cloak x-transition>
+                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block px-2 py-1 border-b border-slate-700/60 mb-1">Pilih Akun Simulasi</span>
+                @foreach($allUsersForSwitch as $usr)
+                    <form action="{{ route('switch-user', $usr->id) }}" method="POST" class="w-full">
+                        @csrf
+                        <button type="submit" 
+                                class="w-full flex items-center justify-between px-2 py-1.5 rounded text-left transition"
+                                :class="'{{ $usr->id }}' == '{{ $activeUserForSidebar->id ?? '' }}' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-300 hover:bg-slate-700 hover:text-white'">
+                            <span class="truncate pr-2">{{ $usr->name }}</span>
+                            @if($activeUserForSidebar && $usr->id == $activeUserForSidebar->id)
+                                <i data-lucide="check" class="w-3 h-3 text-white shrink-0"></i>
+                            @endif
+                        </button>
+                    </form>
+                @endforeach
             </div>
         </div>
     </aside>
